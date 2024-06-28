@@ -1,41 +1,28 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
+import { Controller, Get, Req, Res } from '@nestjs/common';
 import { UserService } from './user.service';
-import { Prisma } from '@prisma/client';
+import { Request, Response } from 'express';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post()
-  create(@Body() createUserDto: Prisma.UserCreateInput) {
-    return this.userService.create(createUserDto);
-  }
-
   @Get()
-  findAll() {
-    return this.userService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: Prisma.UserUpdateInput) {
-    return this.userService.update(+id, updateUserDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
+  async getAllUsers(
+    @Req() request: Request,
+    @Res() response: Response,
+  ): Promise<any> {
+    try {
+      const results = await this.userService.findAll();
+      return response.status(200).json({
+        status: 'OK',
+        message: 'Success fetch data all users',
+        results: results,
+      });
+    } catch (error) {
+      return response.status(500).json({
+        status: 'Error',
+        message: 'Internal Server Error',
+      });
+    }
   }
 }
